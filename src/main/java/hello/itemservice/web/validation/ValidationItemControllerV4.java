@@ -49,6 +49,9 @@ public class ValidationItemControllerV4 {
     public String addItem(@Validated @ModelAttribute("item") ItemSaveForm form, BindingResult bindingResult,
                           RedirectAttributes redirectAttributes) {
 
+        // @ModelAttrubute("item")
+        // model.addAttrubute("item", form) 자동 등록
+
         // 특정 필드가 아닌 복합 룰 검증
         // 이 부분은 메서드로 따로 뽑는 것이 좋다.
         if (form.getPrice() != null && form.getQuantity() != null) {
@@ -65,8 +68,7 @@ public class ValidationItemControllerV4 {
             return "validation/v4/addForm";
         }
 
-
-        // 성공 로직
+        // 성공 로직 (원래는 getter, setter 없이 생성자에서 다하는것이 좋은데 어떻게 하는지 몰름)
         Item item = new Item();
         item.setItemName(form.getItemName());
         item.setPrice(form.getPrice());
