@@ -16,7 +16,7 @@ public class Item {
 //    @NotNull(groups = UpdateCheck.class)
     private Long id;
 
-//    @NotBlank(groups = {SaveCheck.class, UpdateCheck.class})
+//    @NotBlank(groups = {SaveCheck.class, UpdateCheck.class}) // @NotBlank --> 빈값, 공백만 있는 경우를 허용하지 않는다.
     private String itemName;
 
 //    @NotNull(groups = {SaveCheck.class, UpdateCheck.class})
