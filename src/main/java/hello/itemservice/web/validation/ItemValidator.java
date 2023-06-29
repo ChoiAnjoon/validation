@@ -11,6 +11,8 @@ public class ItemValidator implements Validator {
     @Override
     public boolean supports(Class<?> clazz) {
         return Item.class.isAssignableFrom(clazz);
+        // 파라미터로 넘어오는 clazz가 Item 객체 혹은 Item객체의 자식인지 확인
+        // true면 밑의 validate이 실행 됨
     }
 
     @Override

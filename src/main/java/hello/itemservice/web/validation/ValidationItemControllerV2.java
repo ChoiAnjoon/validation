@@ -25,6 +25,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ValidationItemControllerV2 {
 
+    // 생성자가 하나고 파라미터는 두개 임으로 @Autowired 가 자동으로 생성
     private final ItemRepository itemRepository;
     private final ItemValidator itemValidator;
 
@@ -32,6 +33,8 @@ public class ValidationItemControllerV2 {
     public void init(WebDataBinder dataBinder) {
         dataBinder.addValidators(itemValidator);
     }
+    // 지금이 컨트롤러가 호출될 때마다 생성된다 보면됨 위에 것들이 (밑의 어떤 메서드가 실행되든간에)
+    // 이것은 지금 이 컨트롤러에서만 사용될 수 있다. (글로벌하게 검증기를 넣을 수 있는 방법도 있다.)
 
     @GetMapping
     public String items(Model model) {
@@ -53,6 +56,7 @@ public class ValidationItemControllerV2 {
         return "validation/v2/addForm";
     }
 
+    // v1 에서는 type오류는 해결 되었지만, 오류 발생시 사용자의 입력값을 유지하지 못한다는 문제점이 있음
 //    @PostMapping("/add")
     public String addItemV1(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
 
@@ -89,13 +93,14 @@ public class ValidationItemControllerV2 {
         return "redirect:/validation/v2/items/{itemId}";
     }
 
+    // 타입 오류는 bindingResult에서 저절로 해결, 오류 발생시 사용자 입력값 유지 문제를 해결 ( Fielderror의 rejectValue 파라미터로 )
 //    @PostMapping("/add")
     public String addItemV2(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
 
         // 검증 로직
         if (!StringUtils.hasText(item.getItemName())) {
             bindingResult.addError(new FieldError("item", "itemName", item.getItemName(), false,null, null, "상품 이름은 필수 입니다."));
-        }
+        }   // item.getItemName() 오류 발생시 사용자 입력값 을 유지
         if (item.getPrice()==null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
             bindingResult.addError(new FieldError("item", "price", item.getPrice(), false,null, null,"가격은 1,000 ~ 1,000,000 까지 허용합니다."));
         }
@@ -127,9 +132,6 @@ public class ValidationItemControllerV2 {
 
 //    @PostMapping("/add")
     public String addItemV3(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
-
-        log.info("objectName={}", bindingResult.getObjectName());
-        log.info("target={}", bindingResult.getTarget());
 
         // 검증 로직
         if (!StringUtils.hasText(item.getItemName())) {
@@ -167,8 +169,8 @@ public class ValidationItemControllerV2 {
 //    @PostMapping("/add")
     public String addItemV4(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
 
-        log.info("objectName={}", bindingResult.getObjectName());
-        log.info("target={}", bindingResult.getTarget());
+        log.info("objectName={}", bindingResult.getObjectName()); // item
+        log.info("target={}", bindingResult.getTarget()); // item 객체 -> toString 으로 출력 됨
 
         // form의 typeMismatch시에 무조껀 오류를 한번 걸름 즉, 타입 오류 하나만이 우선적으로 걸러져 나타남.
         if (bindingResult.hasErrors()) {
@@ -181,7 +183,7 @@ public class ValidationItemControllerV2 {
             bindingResult.rejectValue("itemName", "required");
             // new String["required.item.itemName", "required"] 1순위, 2순위로 찾아 오류코드를 저장
             // 디테일 한 것이 우선순위가 높다.
-            // rejextValue 호출시 MessageResolver가 오류 코드를 디테일한 것부터 순서대로 자동 생성
+            // rejectValue 호출시 MessageResolver가 오류 코드를 디테일한 것부터 순서대로 자동 생성
         }
         if (item.getPrice()==null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
             bindingResult.rejectValue("price", "range", new Object[]{1000, 1000000}, null);
@@ -194,7 +196,7 @@ public class ValidationItemControllerV2 {
         if (item.getPrice() != null && item.getQuantity() != null) {
             int resultPrice = item.getPrice() * item.getQuantity();
             if (resultPrice < 10000) {
-                bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
+                bindingResult.reject("totalP riceMin", new Object[]{10000, resultPrice}, null);
             }
         }
 
@@ -235,6 +237,7 @@ public class ValidationItemControllerV2 {
     @PostMapping("/add")
     public String addItemV6(@Validated @ModelAttribute Item item, BindingResult bindingResult,
                             RedirectAttributes redirectAttributes, Model model) {
+        // 위의 WebDataBinder 생성하고 @Validated 에노테이션을 넣어주면 자동으로 검증기가 실행 됨.
 
         // 검증에 실패하면 다시 입력 폼으로
         if (bindingResult.hasErrors()) {
